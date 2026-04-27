@@ -1,0 +1,8 @@
+Basic routes:-
+Get all couses
+Get couses by ID
+POST create new courses
+PUT update existing course
+DELETE couse
+GET Filter course
+GET paginated courses

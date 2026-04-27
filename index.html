@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CourseAPI — Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">◈</span>
+    <span class="logo-text">CourseAPI</span>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" data-view="all">
+      <span class="nav-icon">▦</span> All Courses
+    </button>
+    <button class="nav-item" data-view="filter">
+      <span class="nav-icon">◈</span> Filter
+    </button>
+    <button class="nav-item" data-view="paginated">
+      <span class="nav-icon">⊞</span> Paginated
+    </button>
+    <button class="nav-item" data-view="create">
+      <span class="nav-icon">＋</span> New Course
+    </button>
+  </nav>
+  <div class="sidebar-status">
+    <div class="status-dot" id="apiStatus"></div>
+    <span id="apiStatusText">Connecting…</span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title" id="pageTitle">All Courses</h1>
+      <span class="page-sub" id="pageSubtitle">Browse the full catalog</span>
+    </div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <input type="number" id="searchId" placeholder="Jump to ID…" min="1" />
+        <button id="searchBtn" class="btn-ghost">→</button>
+      </div>
+      <button class="btn-refresh" id="refreshBtn" title="Refresh">↺</button>
+    </div>
+  </header>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-chip"><span class="stat-label">Total</span><span class="stat-val" id="statTotal">—</span></div>
+    <div class="stat-chip"><span class="stat-label">Published</span><span class="stat-val" id="statPublished">—</span></div>
+    <div class="stat-chip"><span class="stat-label">Avg Price</span><span class="stat-val" id="statAvgPrice">—</span></div>
+    <div class="stat-chip"><span class="stat-label">Categories</span><span class="stat-val" id="statCats">—</span></div>
+  </div>
+
+  <!-- VIEWS -->
+  <section class="view active" id="view-all">
+    <div class="course-grid" id="courseGrid">
+      <div class="loading-state">Loading courses…</div>
+    </div>
+  </section>
+
+  <section class="view" id="view-filter">
+    <div class="filter-panel">
+      <h2 class="panel-heading">Filter Courses</h2>
+      <div class="filter-form">
+        <div class="field-group">
+          <label>Category</label>
+          <input type="text" id="fCategory" placeholder="e.g. python" />
+        </div>
+        <div class="field-group">
+          <label>Instructor</label>
+          <input type="text" id="fInstructor" placeholder="Exact name" />
+        </div>
+        <div class="field-group">
+          <label>Min Price (₹)</label>
+          <input type="number" id="fMinPrice" placeholder="0" min="0" />
+        </div>
+        <div class="field-group">
+          <label>Max Price (₹)</label>
+          <input type="number" id="fMaxPrice" placeholder="999999" min="0" />
+        </div>
+        <div class="field-group">
+          <label>Published</label>
+          <select id="fPublished">
+            <option value="">Any</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        <button class="btn-primary" id="applyFilter">Apply Filter</button>
+      </div>
+    </div>
+    <div class="course-grid" id="filterGrid">
+      <div class="empty-state">Apply filters to see results.</div>
+    </div>
+  </section>
+
+  <section class="view" id="view-paginated">
+    <div class="pagination-controls">
+      <div class="field-group inline">
+        <label>Page</label>
+        <input type="number" id="pgPage" value="1" min="1" style="width:70px" />
+      </div>
+      <div class="field-group inline">
+        <label>Limit</label>
+        <select id="pgLimit">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="applyPagination">Load</button>
+      <span class="pg-info" id="pgInfo"></span>
+    </div>
+    <div class="course-grid" id="paginatedGrid">
+      <div class="empty-state">Set pagination and click Load.</div>
+    </div>
+    <div class="pg-nav" id="pgNav" style="display:none">
+      <button class="btn-ghost" id="pgPrev">← Prev</button>
+      <button class="btn-ghost" id="pgNext">Next →</button>
+    </div>
+  </section>
+
+  <section class="view" id="view-create">
+    <div class="form-card" id="courseFormCard">
+      <h2 class="panel-heading" id="formHeading">Create New Course</h2>
+      <input type="hidden" id="editId" value="" />
+      <div class="form-grid">
+        <div class="field-group full">
+          <label>Title <span class="req">*</span></label>
+          <input type="text" id="fTitle" placeholder="Min 5 chars, max 100" />
+        </div>
+        <div class="field-group">
+          <label>Instructor <span class="req">*</span></label>
+          <input type="text" id="fInstructor2" placeholder="Min 3 chars" />
+        </div>
+        <div class="field-group">
+          <label>Category <span class="req">*</span></label>
+          <input type="text" id="fCategory2" placeholder="e.g. python" />
+        </div>
+        <div class="field-group">
+          <label>Price (₹) <span class="req">*</span></label>
+          <input type="number" id="fPrice" placeholder="> 0" min="0.01" step="0.01" />
+        </div>
+        <div class="field-group">
+          <label>Duration (hrs) <span class="req">*</span></label>
+          <input type="number" id="fDuration" placeholder="0–20000" min="0" max="20000" />
+        </div>
+        <div class="field-group">
+          <label>Discount %</label>
+          <input type="number" id="fDiscount" placeholder="0–100" min="0" max="100" step="0.1" value="0" />
+        </div>
+        <div class="field-group">
+          <label>Published</label>
+          <select id="fIsPublished">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" id="submitCourse">Create Course</button>
+        <button class="btn-ghost" id="cancelEdit" style="display:none">Cancel Edit</button>
+      </div>
+      <div class="form-msg" id="formMsg"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL: Course Detail / Edit Confirm -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
